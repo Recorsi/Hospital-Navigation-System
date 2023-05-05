@@ -136,28 +136,30 @@ function App() {
   return (
     <div>
       <img src={floorplan} alt="Hospital Floor Plan" onClick={handleClick} />
+
+      <div className="controls-container">
+        {/*For accessing: const dropdown1 = document.getElementById('dropdown1');*/}
+        <label>From</label>
+        <select id="dropdown1">
+          {nodeNames.map((nodeName, index) => (
+            <option key={index} value={nodeName}>{nodeName}</option>
+          ))}
+        </select>
+        <label>To</label>
+        <select id="dropdown2">
+          {nodeNames.map((nodeName, index) => (
+            <option key={index} value={nodeName}>{nodeName}</option>
+          ))}
+        </select>
+        <button onClick={handleShortestPathReq}>Navigate</button>
+        <button onClick={handleGetAllNodes}>New Navigation</button>
+      </div>
+
       {point && (
         <div>
           <p>Clicked at ({point.x}, {point.y})</p>
         </div>
       )}
-
-<div className="controls-container">
-  {/*For accessing: const dropdown1 = document.getElementById('dropdown1');*/}
-  <select id="dropdown1">
-    {nodeNames.map((nodeName, index) => (
-      <option key={index} value={nodeName}>{nodeName}</option>
-    ))}
-  </select>
-  <select id="dropdown2">
-    {nodeNames.map((nodeName, index) => (
-      <option key={index} value={nodeName}>{nodeName}</option>
-    ))}
-  </select>
-  <button onClick={handleShortestPathReq}>Navigate</button>
-  <button onClick={handleGetAllNodes}>New Navigation</button>
-</div>
-
     </div>
   );
 }
