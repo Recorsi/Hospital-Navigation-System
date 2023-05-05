@@ -13,6 +13,45 @@
   }
 }
 
+.controls-container {
+  max-width: 500px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+select, button {
+  padding: 8px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #f1f1f1;
+  height: 40px; /* added height property */
+}
+
+select:focus, button:focus {
+  outline: none;
+  box-shadow: 0 0 5px #9ecaed;
+}
+
+select option {
+  font-size: 16px;
+}
+
+.controls-container button {
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+
+.controls-container button:focus {
+  outline: none;
+  box-shadow: 0 0 5px #9ecaed;
+}
+
+
 img {
   -webkit-user-drag: none;
   -moz-user-drag: none;

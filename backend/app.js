@@ -39,8 +39,8 @@ app.get('/all', (req, res) => {
     });
 });
 
-//GET the shortest path between two nodes
-app.get('/shortestPath', (req, res) => {
+//GET the shortest path between two nodes by their ID
+app.get('/shortestPathByID', (req, res) => {
   const session = req.neo4jSession;
   const node1 = parseInt(req.query.node1); // Parse node1 value from query parameter
   const node2 = parseInt(req.query.node2); // Parse node2 value from query parameter
@@ -58,6 +58,27 @@ app.get('/shortestPath', (req, res) => {
       res.status(500).send('Internal server error');
     });
 });
+
+//GET the shortest path between two nodes by their Name
+app.get('/shortestPathByName', (req, res) => {
+  const session = req.neo4jSession;
+  const node1Name = req.query.node1;
+  const node2Name = req.query.node2;
+
+  session.run('MATCH (node1 {name: $node1Name}), (node2 {name: $node2Name}) ' +
+              'MATCH p=allShortestPaths((node1)-[*]-(node2)) ' +
+              'RETURN nodes(p) AS nodes, reduce(cost=0, r in relationships(p) | cost+r.time_penalty) AS total_penalty ' +
+              'ORDER BY total_penalty LIMIT 1', { node1Name, node2Name })
+    .then(result => {
+      const nodes = result.records[0].get("nodes");
+      res.json(nodes);
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).send('Internal server error');
+    });
+});
+
 
 // Start the server
 const port = process.env.PORT || 3000;
