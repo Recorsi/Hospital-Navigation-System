@@ -1,5 +1,6 @@
 require('dotenv').config();
 const neo4j = require('neo4j-driver');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 const express = require('express');
 
 const app = express();
@@ -23,7 +24,69 @@ app.use((req, res, next) => {
   next();
 });
 
-//GET Complete Database
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(process.env.MONGO_URI, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
+
+let dbName;
+async function connectToMongoDB() {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    dbName = "Hospital-Management-System";
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+connectToMongoDB();
+
+// Get all patients
+app.get('/patients', async (req, res) => {
+  try {
+    // Get a reference to the "Patients" collection
+    const collection = client.db(dbName).collection("Patients");
+
+    // Retrieve all documents from the "Patients" collection
+    const result = await collection.find({}).toArray();
+
+    // Return the retrieved documents as a JSON response
+    res.json(result);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal server error');
+  }
+});
+
+
+
+//Get patient data by room number
+app.get('/patients/:roomNumber', async (req, res) => {
+  const roomNumber = req.params.roomNumber;
+  const patients = client.db(dbName).collection('Patients');
+  try {
+    const result = await patients.findOne({ currentRoomNumber: roomNumber });
+    if (!result) {
+      res.status(404).send('Patient not found');
+      return;
+    }
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal server error');
+  }
+});
+
+
+//GET Complete Neo4j Database
 app.get('/all', (req, res) => {
   const session = req.neo4jSession;
   session.run('MATCH (n) RETURN n')
