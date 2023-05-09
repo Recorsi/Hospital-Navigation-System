@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import './App.css';
 import floorplan from './floorplan.svg';
 import circleImg from './circle.png';
+import logo from './logo.png';
 
 function App() {
   const [point, setPoint] = useState(null);
+  const [patientData, setPatientData] = useState({});
 
   const handleClick = (event) => {
     const pointX = event.nativeEvent.offsetX;
@@ -82,7 +84,6 @@ function App() {
   const [nodeNames, setNodeNames] = useState([]);
 
 
-
   //Shortest Path handle get request
   const handleShortestPathReq = () => {
     const dropdown1 = document.querySelector("#dropdown1").value;
@@ -97,7 +98,6 @@ function App() {
     fetch(`http://localhost:3000/shortestPathByName?node1=${dropdown1}&node2=${dropdown2}`)
       .then(response => response.json())
       .then(data => {
-        console.log(data);
         let circleContainer = document.querySelector('.circle-container');
         if (circleContainer) {
           document.body.removeChild(circleContainer);
@@ -116,9 +116,26 @@ function App() {
           prevNode = node;
         });
         document.body.appendChild(circleContainer);
+
+        //Call patient room number information and display it
+        let room_number = dropdown2.split(' ')[1];
+        if (dropdown2.split(' ')[0] === "Room") {
+          handleGetPatientsByRoomNumber(room_number);
+        }
       })
       .catch(error => console.error(error));
   };
+
+  const handleGetPatientsByRoomNumber = (roomNumber) => {
+    fetch(`http://localhost:3000/patients/${roomNumber}`)
+      .then(response => response.json())
+      .then(data => {
+        //console.log(data);
+        setPatientData(data);
+      })
+      .catch(error => console.error(error));
+  };
+
 
   // const handleKeyDown = (event) => {
   //   if (event.key === 'Enter') {
@@ -135,24 +152,44 @@ function App() {
 
   return (
     <div>
-      <img src={floorplan} alt="Hospital Floor Plan" onClick={handleClick} />
-
-      <div className="controls-container">
-        {/*For accessing: const dropdown1 = document.getElementById('dropdown1');*/}
-        <label>From</label>
-        <select id="dropdown1">
-          {nodeNames.map((nodeName, index) => (
-            <option key={index} value={nodeName}>{nodeName}</option>
-          ))}
-        </select>
-        <label>To</label>
-        <select id="dropdown2">
-          {nodeNames.map((nodeName, index) => (
-            <option key={index} value={nodeName}>{nodeName}</option>
-          ))}
-        </select>
-        <button onClick={handleShortestPathReq}>Navigate</button>
-        <button onClick={handleGetAllNodes}>New Navigation</button>
+      {/* Header */}
+      <div className="header">
+        <img className="logo" src={logo} alt="Logo" />
+        <h1 className="product-name">Hospital Navigation</h1>
+      </div>
+      {/* Navigation Controls */}
+      <div className="container">
+        <div className="controls-container">
+          <div>
+            <label>From</label>
+            <select id="dropdown1">
+              {nodeNames.map((nodeName, index) => (
+                <option key={index} value={nodeName}>{nodeName}</option>
+              ))}
+            </select>
+            <label>To</label>
+            <select id="dropdown2">
+              {nodeNames.map((nodeName, index) => (
+                <option key={index} value={nodeName}>{nodeName}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <button onClick={handleShortestPathReq}>Navigate</button>
+            <button onClick={() => { handleGetAllNodes(); setPatientData(null); }}>New Navigation</button>
+          </div>
+        </div>
+        {/* Floorplan */}
+        <div className="floorplan-container">
+          <img className="floorplan-img" src={floorplan} alt="Hospital Floor Plan" onClick={handleClick} />
+        </div>
+        {/* Patient Data */}
+        <div className="patient-data-container">
+          <h2>Patient Data</h2>
+          <p>Name: {patientData?.firstName} {patientData?.lastName}</p>
+          <p>Age: {patientData?.age}</p>
+          <p>Room: {patientData?.currentRoomNumber}</p>
+        </div>
       </div>
 
       {point && (
@@ -160,6 +197,11 @@ function App() {
           <p>Clicked at ({point.x}, {point.y})</p>
         </div>
       )}
+
+      {/* Footer */}
+      <div className="footer">
+        <p className="footer-text">Copyright © 2023 RoomNav</p>
+      </div>
     </div>
   );
 }

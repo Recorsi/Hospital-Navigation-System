@@ -91,6 +91,7 @@ app.get('/all', (req, res) => {
   const session = req.neo4jSession;
   session.run('MATCH (n) RETURN n')
     .then(result => {
+      //console.log(result);
       const records = result.records.map(record => record.get(0));
       session.close();
       res.json(records);
