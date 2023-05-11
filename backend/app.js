@@ -66,8 +66,6 @@ app.get('/patients', async (req, res) => {
   }
 });
 
-
-
 //Get patient data by room number
 app.get('/patients/:roomNumber', async (req, res) => {
   const roomNumber = req.params.roomNumber;

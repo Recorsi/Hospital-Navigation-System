@@ -1,12 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
-import floorplan from './floorplan.svg';
+
+//import floorplan from './floorplan.svg';
+import floorplan_gnd from './groundfloor.png';
+import floorplan_1st from './firstfloor.png';
+
 import circleImg from './circle.png';
 import logo from './logo.png';
 
 function App() {
   const [point, setPoint] = useState(null);
   const [patientData, setPatientData] = useState({});
+  const [floorNumber, setFloorNumber] = useState(0);
+  const [allNodeNames, setAllNodeNames] = useState([]);
+
+
+  useEffect(() => { handleFloorChange(); }, [floorNumber]);
 
   const handleClick = (event) => {
     const pointX = event.nativeEvent.offsetX;
@@ -16,11 +25,22 @@ function App() {
 
   //Create a node element on the floorplan
   const createNodeElement = (node) => {
+    let xOffset;
+    let yOffset;
+    if (floorNumber === 0) {
+      xOffset = 388;
+      yOffset = 150;
+    }
+    else {
+      xOffset = 383;
+      yOffset = 150;
+    }
+
     const circle = document.createElement('img');
     const circleDiameter = 40;
     circle.style.position = 'absolute';
-    circle.style.left = `${node.properties.x.low - circleDiameter / 2}px`;
-    circle.style.top = `${node.properties.y.low - circleDiameter / 2}px`;
+    circle.style.left = `${node.properties.x.low - circleDiameter / 2 + xOffset}px`;
+    circle.style.top = `${node.properties.y.low - circleDiameter / 2 + yOffset}px`;
     circle.style.width = `${circleDiameter}px`;
     circle.style.height = `${circleDiameter}px`;
     circle.setAttribute('src', circleImg);
@@ -29,10 +49,12 @@ function App() {
     const nodeText = document.createElement('div');
     nodeText.textContent = node.properties.name;
     nodeText.style.position = 'absolute';
-    nodeText.style.top = `${node.properties.y.low - 50}px`;
-    nodeText.style.left = `${node.properties.x.low - 40}px`;
-    nodeText.style.width = '80px';
+    nodeText.style.left = `${node.properties.x.low - 40 + xOffset}px`;
+    nodeText.style.top = `${node.properties.y.low - 50 + yOffset}px`;
+    nodeText.style.width = '85px';
     nodeText.style.textAlign = 'center';
+    nodeText.style.backgroundColor = 'white';
+
 
     const nodeContainer = document.createElement('div');
     nodeContainer.appendChild(circle);
@@ -42,13 +64,24 @@ function App() {
 
   //Create a line between nodes
   const createLineElement = (prevNode, node) => {
+    let xOffset;
+    let yOffset;
+    if (floorNumber === 0) {
+      xOffset = 390;
+      yOffset = 150;
+    }
+    else {
+      xOffset = 383;
+      yOffset = 150;
+    }
+
     const line = document.createElement('img');
     const dx = node.properties.x.low - prevNode.properties.x.low;
     const dy = node.properties.y.low - prevNode.properties.y.low;
     const distance = Math.sqrt(dx * dx + dy * dy);
     line.style.position = 'absolute';
-    line.style.left = `${prevNode.properties.x.low}px`;
-    line.style.top = `${prevNode.properties.y.low}px`;
+    line.style.left = `${prevNode.properties.x.low + xOffset}px`;
+    line.style.top = `${prevNode.properties.y.low + yOffset}px`;
     line.style.width = `${distance}px`;
     line.style.height = '5px';
     line.style.backgroundColor = 'black';
@@ -58,11 +91,12 @@ function App() {
     return line;
   };
 
+
   const handleGetAllNodes = () => {
     fetch('http://localhost:3000/all')
       .then(response => response.json())
       .then(data => {
-        console.log(data);
+        //console.log(data);
         let circleContainer = document.querySelector('.circle-container');
         if (circleContainer) {
           document.body.removeChild(circleContainer);
@@ -70,16 +104,22 @@ function App() {
         circleContainer = document.createElement('div');
         circleContainer.classList.add('circle-container');
         let nodeNames = [];
+        let allNodeNames = [];
         data.forEach(node => {
-          const nodeElement = createNodeElement(node);
-          circleContainer.appendChild(nodeElement);
-          nodeNames.push(node.properties.name);
+          if (node.properties.floor.low === floorNumber) {
+            const nodeElement = createNodeElement(node);
+            circleContainer.appendChild(nodeElement);
+            nodeNames.push(node.properties.name);
+          }
+          allNodeNames.push(node.properties.name);
         });
         document.body.appendChild(circleContainer);
         setNodeNames(nodeNames);
+        setAllNodeNames(allNodeNames);
       })
       .catch(error => console.error(error));
   };
+
   //export node names
   const [nodeNames, setNodeNames] = useState([]);
 
@@ -106,14 +146,16 @@ function App() {
         circleContainer.classList.add('circle-container');
         let prevNode = null;
         data.forEach(node => {
-          const nodeElement = createNodeElement(node);
-          circleContainer.appendChild(nodeElement);
+          if (node.properties.floor.low === floorNumber) {
+            const nodeElement = createNodeElement(node);
+            circleContainer.appendChild(nodeElement);
 
-          if (prevNode) {
-            const lineElement = createLineElement(prevNode, node);
-            circleContainer.appendChild(lineElement);
+            if (prevNode) {
+              const lineElement = createLineElement(prevNode, node);
+              circleContainer.appendChild(lineElement);
+            }
+            prevNode = node;
           }
-          prevNode = node;
         });
         document.body.appendChild(circleContainer);
 
@@ -136,6 +178,22 @@ function App() {
       .catch(error => console.error(error));
   };
 
+  const handleFloorChange = () => {
+    const dropdown1 = document.querySelector("#dropdown1").value;
+    const dropdown2 = document.querySelector("#dropdown2").value;
+    if (floorNumber === 0) {
+      document.getElementById("floorplan-img").src = floorplan_gnd;
+      handleGetAllNodes();
+      if (dropdown1 !== dropdown2)
+        handleShortestPathReq();
+    } else if (floorNumber === 1) {
+      document.getElementById("floorplan-img").src = floorplan_1st;
+      handleGetAllNodes();
+      if (dropdown1 !== dropdown2)
+        handleShortestPathReq();
+    }
+  };
+
 
   // const handleKeyDown = (event) => {
   //   if (event.key === 'Enter') {
@@ -147,8 +205,6 @@ function App() {
   window.onload = function () {
     handleGetAllNodes();
   };
-
-
 
   return (
     <div>
@@ -163,25 +219,26 @@ function App() {
           <div>
             <label>From</label>
             <select id="dropdown1">
-              {nodeNames.map((nodeName, index) => (
-                <option key={index} value={nodeName}>{nodeName}</option>
-              ))}
+              {allNodeNames.map(name => <option key={name} value={name}>{name}</option>)}
             </select>
             <label>To</label>
             <select id="dropdown2">
-              {nodeNames.map((nodeName, index) => (
-                <option key={index} value={nodeName}>{nodeName}</option>
-              ))}
+              {allNodeNames.map(name => <option key={name} value={name}>{name}</option>)}
             </select>
           </div>
           <div>
             <button onClick={handleShortestPathReq}>Navigate</button>
-            <button onClick={() => { handleGetAllNodes(); setPatientData(null); }}>New Navigation</button>
+            <button onClick={() => { handleGetAllNodes(); setPatientData(null); document.querySelector("#dropdown1").selectedIndex = 0; document.querySelector("#dropdown2").selectedIndex = 0; }}>New Navigation</button>
+          </div>
+          <div>
+            <h2>Selected Floor: {floorNumber}</h2>
+            <button onClick={() => setFloorNumber(0)}>0</button>
+            <button onClick={() => setFloorNumber(1)}>1</button>
           </div>
         </div>
         {/* Floorplan */}
         <div className="floorplan-container">
-          <img className="floorplan-img" src={floorplan} alt="Hospital Floor Plan" onClick={handleClick} />
+          <img id="floorplan-img" className="floorplan-img" src={floorplan_gnd} alt="Hospital Floor Plan" onClick={handleClick} />
         </div>
         {/* Patient Data */}
         <div className="patient-data-container">
