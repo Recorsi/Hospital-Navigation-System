@@ -236,7 +236,7 @@ function App() {
             <button onClick={() => setFloorNumber(1)}>1</button>
           </div>
         </div>
-        {/* Floorplan */}
+        {/* Floorplan */} 
         <div className="floorplan-container">
           <img id="floorplan-img" className="floorplan-img" src={floorplan_gnd} alt="Hospital Floor Plan" onClick={handleClick} />
         </div>
