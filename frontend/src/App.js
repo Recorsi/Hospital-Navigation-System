@@ -114,10 +114,15 @@ function App() {
           allNodeNames.push(node.properties.name);
         });
         document.body.appendChild(circleContainer);
+        setNodeNames(nodeNames);
         setAllNodeNames(allNodeNames);
       })
       .catch(error => console.error(error));
   };
+
+  //export node names
+  const [nodeNames, setNodeNames] = useState([]);
+
 
   //Shortest Path handle get request
   const handleShortestPathReq = () => {
@@ -222,8 +227,8 @@ function App() {
             </select>
           </div>
           <div>
-            <button onClick={() => {setPatientData({}); handleShortestPathReq();}}>Navigate</button>
-            <button onClick={() => { setPatientData({}); handleGetAllNodes(); setPatientData(null); document.querySelector("#dropdown1").selectedIndex = 0; document.querySelector("#dropdown2").selectedIndex = 0; }}>New Navigation</button>
+            <button onClick={handleShortestPathReq}>Navigate</button>
+            <button onClick={() => { handleGetAllNodes(); setPatientData(null); document.querySelector("#dropdown1").selectedIndex = 0; document.querySelector("#dropdown2").selectedIndex = 0; }}>New Navigation</button>
           </div>
           <div>
             <h2>Selected Floor: {floorNumber}</h2>
@@ -239,16 +244,9 @@ function App() {
         <div className="patient-data-container">
           <h2>Patient Data</h2>
           <p>Name: {patientData?.firstName} {patientData?.lastName}</p>
+          <p>Age: {patientData?.age}</p>
           <p>Room: {patientData?.currentRoomNumber}</p>
-          <p>Birthdate: {patientData?.birthDate}</p>
-          <p>Medical Reason: {patientData?.medReason}</p>
-          <p>Sex: {patientData?.sex}</p>
-          <p>Allergies: {patientData?.allergies}</p>
-          <p>Medication: {patientData?.medication}</p>
-          <p>Last Appointment: {patientData?.lastAppointment}</p>
-          <p>Next Appointment: {patientData?.nextAppointment}</p>
         </div>
-
       </div>
 
       {point && (
