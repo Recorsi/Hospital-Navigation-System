@@ -13,7 +13,7 @@ const driver = neo4j.driver(neo4jUri, neo4j.auth.basic(neo4jUser, neo4jPassword)
 
 //CORS
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*'); //Very bad for security, but ok for this project
+  res.setHeader('Access-Control-Allow-Origin', '*'); //Not secure, just for testing!
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') {
@@ -24,7 +24,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+//Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(process.env.MONGO_URI, {
   serverApi: {
     version: ServerApiVersion.v1,
