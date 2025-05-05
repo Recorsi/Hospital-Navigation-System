@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-//import floorplan from './floorplan.svg';
-import floorplan_gnd from './groundfloor.png';
-import floorplan_1st from './firstfloor.png';
-
-import circleImg from './circle.png';
-import logo from './logo.png';
+const floorplan_gnd = "/groundfloor.png";
+const floorplan_1st = "/firstfloor.png";
+const circleImg = "/circle.png";
+const logo = "/logo.png";
 
 function App() {
   const [point, setPoint] = useState(null);
