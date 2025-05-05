@@ -91,7 +91,7 @@ function App() {
     return line;
   };
 
-
+  //Fetch all Neo4j nodes, filter by floor, display them in a circle layout, and update the node name list.
   const handleGetAllNodes = () => {
     fetch('http://localhost:3000/all')
       .then(response => response.json())
@@ -222,7 +222,7 @@ function App() {
             </select>
           </div>
           <div>
-            <button onClick={() => {setPatientData({}); handleShortestPathReq();}}>Navigate</button>
+            <button onClick={() => { setPatientData({}); handleShortestPathReq(); }}>Navigate</button>
             <button onClick={() => { setPatientData({}); handleGetAllNodes(); setPatientData(null); document.querySelector("#dropdown1").selectedIndex = 0; document.querySelector("#dropdown2").selectedIndex = 0; }}>New Navigation</button>
           </div>
           <div>
